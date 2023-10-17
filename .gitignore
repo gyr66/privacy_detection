@@ -1,2 +1,5 @@
 .vscode
 data
+tmp
+wandb
+RoBERTa-finetuned-privacy-detection
