@@ -58,11 +58,14 @@ if __name__ == "__main__":
         "--repo_name", type=str, default="bert-base-chinese-finetuned-ner"
     )
     parser.add_argument("--epochs", type=int, default=10)
+    parser.add_argument("--dry_run", action="store_true")
 
     args = parser.parse_args()
 
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_ids
+
+    os.environ["TRANSFORMERS_NO_ADVISORY_WARNINGS"] = "true"
 
     dataset = load_dataset("gyr66/privacy_detection")
 
@@ -115,7 +118,8 @@ if __name__ == "__main__":
         tokenizer=tokenizer,
     )
 
-    trainer.train()
+    if not args.dry_run:
+        trainer.train()
     metric = trainer.evaluate()
     print("Evaluate the best model on the validation set:")
     print(metric)
