@@ -52,10 +52,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--gpu_ids", type=str, default="1,2,3,4,5,6,7")
     parser.add_argument(
-        "--check_point", type=str, default="bert-base-chinese-finetuned-ner"
+        "--check_point", type=str, default="RoBERTa-ext-large-chinese-finetuned-ner"
     )
     parser.add_argument(
-        "--repo_name", type=str, default="bert-base-chinese-finetuned-ner"
+        "--repo_name", type=str, default="RoBERTa-ext-large-chinese-finetuned-ner"
     )
     parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--dry_run", action="store_true")
@@ -100,7 +100,7 @@ if __name__ == "__main__":
         learning_rate=2e-5,
         num_train_epochs=args.epochs,
         weight_decay=0.01,
-        per_device_train_batch_size=8,
+        per_device_train_batch_size=4,
         logging_strategy="epoch",
         dataloader_num_workers=16,
         metric_for_best_model="f1",

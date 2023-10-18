@@ -4,3 +4,4 @@ tmp
 wandb
 RoBERTa-finetuned-privacy-detection
 bert-base-chinese-finetuned-ner
+RoBERTa-ext-large-chinese-finetuned-ner
