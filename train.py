@@ -52,7 +52,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--gpu_ids", type=str, default="1,2,3,4,5,6,7")
     parser.add_argument(
-        "--checkpoint", type=str, default="bert-base-chinese-finetuned-ner"
+        "--check_point", type=str, default="bert-base-chinese-finetuned-ner"
     )
     parser.add_argument(
         "--repo_name", type=str, default="bert-base-chinese-finetuned-ner"
@@ -77,7 +77,7 @@ if __name__ == "__main__":
     id2label = {str(i): label for i, label in enumerate(label_names)}
     label2id = {v: k for k, v in id2label.items()}
 
-    check_point = args.checkpoint
+    check_point = args.check_point
     tokenizer = AutoTokenizer.from_pretrained(check_point, ignore_mismatched_sizes=True)
     model = AutoModelForTokenClassification.from_pretrained(
         check_point, id2label=id2label, label2id=label2id, ignore_mismatched_sizes=True
@@ -120,7 +120,7 @@ if __name__ == "__main__":
 
     if not args.dry_run:
         trainer.train()
+        trainer.save_model(args.repo_name)
     metric = trainer.evaluate()
     print("Evaluate the best model on the validation set:")
     print(metric)
-    trainer.save_model(args.repo_name)
