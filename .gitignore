@@ -1,7 +1,8 @@
 .vscode
+*.pyc
 data
 tmp
 wandb
-RoBERTa-finetuned-privacy-detection
-bert-base-chinese-finetuned-ner
 RoBERTa-ext-large-chinese-finetuned-ner
+bert-base-chinese-finetuned-crf-ner
+RoBERTa-ext-large-chinese-finetuned-crf-ner

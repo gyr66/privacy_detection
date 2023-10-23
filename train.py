@@ -2,11 +2,12 @@ import os
 from datasets import load_dataset
 from transformers import (
     AutoTokenizer,
-    AutoModelForTokenClassification,
     DataCollatorForTokenClassification,
     TrainingArguments,
     Trainer,
+    BertForTokenClassification
 )
+from model import BERT_CRF_ForTokenClassification
 import evaluate
 import numpy as np
 import argparse
@@ -26,7 +27,6 @@ def tokenize_and_align_labels(examples, tokenizer):
         word_ids = tokenized_inputs.word_ids(i)
         new_labels.append(align_labels_with_tokens(labels, word_ids))
     tokenized_inputs["labels"] = new_labels
-
     return tokenized_inputs
 
 
@@ -50,12 +50,12 @@ def compute_metrics(eval_preds):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--gpu_ids", type=str, default="1,2,3,4,5,6,7")
+    parser.add_argument("--gpu_ids", type=str, default="0,1,2,3,4,5,6,7")
     parser.add_argument(
         "--check_point", type=str, default="RoBERTa-ext-large-chinese-finetuned-ner"
     )
     parser.add_argument(
-        "--repo_name", type=str, default="RoBERTa-ext-large-chinese-finetuned-ner"
+        "--repo_name", type=str, default="RoBERTa-ext-large-chinese-finetuned-crf-ner"
     )
     parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--dry_run", action="store_true")
@@ -74,13 +74,16 @@ if __name__ == "__main__":
 
     ner_feature = dataset["train"].features["ner_tags"]
     label_names = ner_feature.feature.names
-    id2label = {str(i): label for i, label in enumerate(label_names)}
+    id2label = {i: label for i, label in enumerate(label_names)}
     label2id = {v: k for k, v in id2label.items()}
 
     check_point = args.check_point
     tokenizer = AutoTokenizer.from_pretrained(check_point, ignore_mismatched_sizes=True)
-    model = AutoModelForTokenClassification.from_pretrained(
-        check_point, id2label=id2label, label2id=label2id, ignore_mismatched_sizes=True
+    # model = AutoModelForTokenClassification.from_pretrained(
+    #     check_point, id2label=id2label, label2id=label2id, ignore_mismatched_sizes=True
+    # )
+    model = BERT_CRF_ForTokenClassification.from_pretrained(
+        check_point, num_labels=len(id2label)
     )
 
     tokenized_dataset = dataset.map(
