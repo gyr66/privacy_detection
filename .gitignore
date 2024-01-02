@@ -6,3 +6,6 @@ wandb
 RoBERTa-ext-large-chinese-finetuned-ner
 bert-base-chinese-finetuned-crf-ner
 RoBERTa-ext-large-chinese-finetuned-crf-ner
+tmp*
+trash
+chinese-roberta-wwm-ext-large-lora-crf-ner

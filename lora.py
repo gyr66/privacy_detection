@@ -5,8 +5,8 @@ from transformers import (
     DataCollatorForTokenClassification,
     TrainingArguments,
     Trainer,
-    BertForTokenClassification,
 )
+from peft import get_peft_model, LoraConfig, TaskType
 from model import BERT_CRF_ForTokenClassification
 import evaluate
 import numpy as np
@@ -52,10 +52,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--gpu_ids", type=str, default="0,1,2,3,4,5,6,7")
     parser.add_argument(
-        "--check_point", type=str, default="RoBERTa-ext-large-chinese-finetuned-ner"
+        "--check_point", type=str, default="hfl/chinese-roberta-wwm-ext-large"
     )
     parser.add_argument(
-        "--repo_name", type=str, default="RoBERTa-ext-large-chinese-finetuned-crf-ner"
+        "--repo_name", type=str, default="chinese-roberta-wwm-ext-large-lora-crf-ner"
     )
     parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--dry_run", action="store_true")
@@ -79,12 +79,22 @@ if __name__ == "__main__":
 
     check_point = args.check_point
     tokenizer = AutoTokenizer.from_pretrained(check_point, ignore_mismatched_sizes=True)
-    # model = AutoModelForTokenClassification.from_pretrained(
-    #     check_point, id2label=id2label, label2id=label2id, ignore_mismatched_sizes=True
-    # )
+
     model = BERT_CRF_ForTokenClassification.from_pretrained(
         check_point, num_labels=len(id2label)
     )
+
+    peft_config = LoraConfig(
+        task_type=TaskType.TOKEN_CLS,
+        inference_mode=False,
+        r=8,
+        lora_alpha=16,
+        lora_dropout=0.1,
+        bias="none",
+    )
+
+    model = get_peft_model(model, peft_config)
+    model.print_trainable_parameters()
 
     tokenized_dataset = dataset.map(
         tokenize_and_align_labels,
@@ -100,7 +110,7 @@ if __name__ == "__main__":
         args.repo_name,
         evaluation_strategy="epoch",
         save_strategy="epoch",
-        learning_rate=2e-5,
+        learning_rate=1e-3,
         num_train_epochs=args.epochs,
         weight_decay=0.01,
         per_device_train_batch_size=4,
@@ -110,6 +120,7 @@ if __name__ == "__main__":
         load_best_model_at_end=True,
         save_total_limit=1,
         report_to="none",
+        push_to_hub=True,
     )
 
     trainer = Trainer(
