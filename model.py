@@ -57,7 +57,7 @@ class BERT_CRF_ForTokenClassification(BertPreTrainedModel):
         logits = self.classifier(sequence_output)
         dummy_logits = torch.zeros_like(logits).to(logits.device)
 
-        valid_lens = attention_mask.sum(dim=1) - 2
+        valid_lens = attention_mask.sum(dim=1) - 1
         logits = logits[:, 1:]
         labels_mask = torch.arange(logits.size(1)).to(
             valid_lens.device
@@ -71,7 +71,7 @@ class BERT_CRF_ForTokenClassification(BertPreTrainedModel):
             is_pad = labels == -100
             labels.masked_fill_(is_pad, 0)
             assert torch.eq(~is_pad, labels_mask).all().item(), "mask assertion failed "
-            loss = -self.crf(logits, labels, mask=labels_mask, reduction="token_mean")
+            loss = -self.crf(logits, labels, mask=labels_mask, reduction="mean")
 
         padded_list = torch.nn.utils.rnn.pad_sequence(
             [torch.tensor(lst) for lst in seq_label_ids],
