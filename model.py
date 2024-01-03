@@ -57,7 +57,7 @@ class BERT_CRF_ForTokenClassification(BertPreTrainedModel):
         logits = self.classifier(sequence_output)
         dummy_logits = torch.zeros_like(logits).to(logits.device)
 
-        valid_lens = attention_mask.sum(dim=1) - 1
+        valid_lens = attention_mask.sum(dim=1) - 2
         logits = logits[:, 1:]
         labels_mask = torch.arange(logits.size(1)).to(
             valid_lens.device
