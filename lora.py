@@ -59,6 +59,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--dry_run", action="store_true")
+    parser.add_argument("--push_to_hub", action="store_true")
 
     args = parser.parse_args()
 
@@ -139,3 +140,8 @@ if __name__ == "__main__":
     metric = trainer.evaluate()
     print("Evaluate the best model on the validation set:")
     print(metric)
+
+    if args.push_to_hub:
+        trainer.push_to_hub()
+    else:
+        trainer.create_model_card()
