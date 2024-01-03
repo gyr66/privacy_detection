@@ -55,7 +55,9 @@ if __name__ == "__main__":
         "--check_point", type=str, default="hfl/chinese-roberta-wwm-ext-large"
     )
     parser.add_argument(
-        "--repo_name", type=str, default="chinese-roberta-wwm-ext-large-lora-crf-ner"
+        "--repo_name",
+        type=str,
+        default="RoBERTa-ext-large-crf-lora-chinese-finetuned-ner ",
     )
     parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--dry_run", action="store_true")
@@ -84,6 +86,8 @@ if __name__ == "__main__":
     model = BertCrfForTokenClassification.from_pretrained(
         check_point, num_labels=len(id2label)
     )
+    model.config.id2label = id2label
+    model.config.label2id = label2id
 
     peft_config = LoraConfig(
         task_type=TaskType.TOKEN_CLS,
@@ -111,7 +115,7 @@ if __name__ == "__main__":
         args.repo_name,
         evaluation_strategy="epoch",
         save_strategy="epoch",
-        learning_rate=1e-3,
+        learning_rate=2e-5,
         num_train_epochs=args.epochs,
         weight_decay=0.01,
         per_device_train_batch_size=4,
@@ -121,7 +125,6 @@ if __name__ == "__main__":
         load_best_model_at_end=True,
         save_total_limit=1,
         report_to="none",
-        push_to_hub=True,
     )
 
     trainer = Trainer(
@@ -145,3 +148,5 @@ if __name__ == "__main__":
         trainer.push_to_hub()
     else:
         trainer.create_model_card()
+
+# python train_lora.py --check_point hfl/chinese-roberta-wwm-ext-large --repo_name RoBERTa-ext-large-crf-lora-chinese-finetuned-ner --push_to_hub --epochs 1 --gpu_ids 0,2,3,4,5,6,7

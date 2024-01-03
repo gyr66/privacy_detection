@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from torchcrf import CRF
-from transformers import BertPreTrainedModel, BertModel
+from transformers import BertPreTrainedModel, BertModel, BertForTokenClassification
 from transformers.modeling_outputs import TokenClassifierOutput
 
 
@@ -71,7 +71,7 @@ class BertCrfForTokenClassification(BertPreTrainedModel):
             is_pad = labels == -100
             labels.masked_fill_(is_pad, 0)
             assert torch.eq(~is_pad, labels_mask).all().item(), "mask assertion failed "
-            loss = -self.crf(logits, labels, mask=labels_mask, reduction="mean")
+            loss = -self.crf(logits, labels, mask=labels_mask, reduction="token_mean")
 
         padded_list = torch.nn.utils.rnn.pad_sequence(
             [torch.tensor(lst) for lst in seq_label_ids],

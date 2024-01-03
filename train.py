@@ -5,7 +5,6 @@ from transformers import (
     DataCollatorForTokenClassification,
     TrainingArguments,
     Trainer,
-    BertForTokenClassification,
 )
 from model import BertCrfForTokenClassification
 import evaluate
@@ -52,7 +51,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--gpu_ids", type=str, default="0,1,2,3,4,5,6,7")
     parser.add_argument(
-        "--check_point", type=str, default="RoBERTa-ext-large-chinese-finetuned-ner"
+        "--check_point", type=str, default="hfl/chinese-roberta-wwm-ext-large"
     )
     parser.add_argument(
         "--repo_name", type=str, default="RoBERTa-ext-large-chinese-finetuned-crf-ner"
@@ -84,8 +83,11 @@ if __name__ == "__main__":
     #     check_point, id2label=id2label, label2id=label2id, ignore_mismatched_sizes=True
     # )
     model = BertCrfForTokenClassification.from_pretrained(
-        check_point, num_labels=len(id2label)
+        check_point,
+        num_labels=len(id2label),
     )
+    model.config.id2label = id2label
+    model.config.label2id = label2id
 
     tokenized_dataset = dataset.map(
         tokenize_and_align_labels,
@@ -134,3 +136,5 @@ if __name__ == "__main__":
         trainer.push_to_hub()
     else:
         trainer.create_model_card()
+
+# python train.py --check_point ./RoBERTa-ext-large-chinese-finetuned-ner --repo_name RoBERTa-ext-large-crf-chinese-finetuned-ner --push_to_hub --epochs 10
