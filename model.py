@@ -5,7 +5,7 @@ from transformers import BertPreTrainedModel, BertModel
 from transformers.modeling_outputs import TokenClassifierOutput
 
 
-class BERT_CRF_ForTokenClassification(BertPreTrainedModel):
+class BertCrfForTokenClassification(BertPreTrainedModel):
     _keys_to_ignore_on_load_unexpected = [r"pooler"]
 
     def __init__(self, config):

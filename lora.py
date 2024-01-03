@@ -7,7 +7,7 @@ from transformers import (
     Trainer,
 )
 from peft import get_peft_model, LoraConfig, TaskType
-from model import BERT_CRF_ForTokenClassification
+from model import BertCrfForTokenClassification
 import evaluate
 import numpy as np
 import argparse
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     check_point = args.check_point
     tokenizer = AutoTokenizer.from_pretrained(check_point, ignore_mismatched_sizes=True)
 
-    model = BERT_CRF_ForTokenClassification.from_pretrained(
+    model = BertCrfForTokenClassification.from_pretrained(
         check_point, num_labels=len(id2label)
     )
 

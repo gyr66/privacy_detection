@@ -7,7 +7,7 @@ from transformers import (
     Trainer,
     BertForTokenClassification,
 )
-from model import BERT_CRF_ForTokenClassification
+from model import BertCrfForTokenClassification
 import evaluate
 import numpy as np
 import argparse
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     # model = AutoModelForTokenClassification.from_pretrained(
     #     check_point, id2label=id2label, label2id=label2id, ignore_mismatched_sizes=True
     # )
-    model = BERT_CRF_ForTokenClassification.from_pretrained(
+    model = BertCrfForTokenClassification.from_pretrained(
         check_point, num_labels=len(id2label)
     )
 
@@ -129,7 +129,7 @@ if __name__ == "__main__":
     metric = trainer.evaluate()
     print("Evaluate the best model on the validation set:")
     print(metric)
-    
+
     if args.push_to_hub:
         trainer.push_to_hub()
     else:

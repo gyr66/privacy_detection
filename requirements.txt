@@ -3,6 +3,6 @@ evaluate
 numpy
 peft
 pytorch_crf
-torch
+torch==2.0.1
 transformers
 seqeval
