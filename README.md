@@ -14,9 +14,9 @@
 
 常用的解决技术包括：
 
-**规则方法：**使用正则表达式匹配邮箱、手机号等。
+**规则方法**：使用正则表达式匹配邮箱、手机号等。
 
-**序列标注：**对于每个token打标签，标签由实体位置信息（BIO）和实体类型信息（如PER、LOC、ORG）组成。通过这些标签可以识别出实体。
+**序列标注**：对于每个token打标签，标签由实体位置信息（BIO）和实体类型信息（如PER、LOC、ORG）组成。通过这些标签可以识别出实体。
 
 ![image-20240104110736732](./picture/image-20240104110736732.png)
 
@@ -26,11 +26,11 @@
 
 - **GPT**：输入文本作为prompt，模型在prompt的基础上，生成标注后的目标文本。
 
-（标注后的目标文本可以是方便抽取实体的任意格式，比如*<佘达>[name];<建行>[company];<中弘北京像素>[company];<销售总监>[position];<龙坤>[name]*。）
+（标注后的目标文本可以是方便抽取实体的任意格式，比如 *<佘达>[name];<建行>[company];<中弘北京像素>[company];<销售总监>[position];<龙坤>[name]* 。）
 
-**阅读理解：**将实体识别转换为阅读理解任务，将输入文本作为context，对于要识别的不同实体类型可以设置不同的问题，比如：找出出现的人名，找出出现的地名等。
+**阅读理解**：将实体识别转换为阅读理解任务，将输入文本作为context，对于要识别的不同实体类型可以设置不同的问题，比如：找出出现的人名，找出出现的地名等。
 
-我们尝试了**基于BERT的序列标注方法（NLU）**和**基于GPT的序列生成方法（NLG）**，在模型的预测输出之上，我们再利用**正则表达式（规则方法）**对手机号、微信号、QQ号进行匹配，提升在这三类实体上的召回率（Recall）。
+我们尝试了 **基于BERT的序列标注方法（NLU）** 和 **基于GPT的序列生成方法（NLG）**，在模型的预测输出之上，我们再利用 **正则表达式（规则方法）** 对手机号、微信号、QQ号进行匹配，提升在这三类实体上的召回率（Recall）。
 
 ## 数据集
 
@@ -54,13 +54,13 @@
 
 - **CRF**
 
-- **LSTM**（https://arxiv.org/abs/1508.01991）
+- **LSTM**（ https://arxiv.org/abs/1508.01991 ）
 
-- **BERT**（https://arxiv.org/abs/1810.04805）
+- **BERT**（ https://arxiv.org/abs/1810.04805 ）
 
 我尝试了BERT、RoBERTa，带CRF头以及不带CRF头。
 
-为了解决过拟合问题，我尝试使用**LoRA**（https://arxiv.org/abs/2106.09685），减少可训练的参数数量。
+为了解决过拟合问题，我尝试使用**LoRA**（ https://arxiv.org/abs/2106.09685 ），减少可训练的参数数量。
 
 ### 数据预处理
 
@@ -73,7 +73,7 @@
 
 ![image-20240104122330494](./picture/image-20240104122330494.png)
 
-为了方便后面测试模型，我将预处理好的数据集使用Hugging Face的datasets库进行了封装，上传到了Hugging Face仓库中：https://huggingface.co/datasets/gyr66/privacy_detection。
+为了方便后面测试模型，我将预处理好的数据集使用Hugging Face的datasets库进行了封装，上传到了Hugging Face仓库中：https://huggingface.co/datasets/gyr66/privacy_detection 。
 
 ![image-20240104122353107](./picture/image-20240104122353107.png)
 
@@ -85,13 +85,13 @@
 
 模型训练脚本请见： https://github.com/gyr66/privacy_detection/blob/master/train.py 。
 
-数据集是中文，因此要选择中文的BERT，比如bert-base-chinese。为了更加充分发挥预训练模型的能力，我选择了在NER数据集上微调过的BERT作为预训练模型：https://huggingface.co/Danielwei0214/bert-base-chinese-finetuned-ner。
+数据集是中文，因此要选择中文的BERT，比如bert-base-chinese。为了更加充分发挥预训练模型的能力，我选择了在NER数据集上微调过的BERT作为预训练模型：https://huggingface.co/Danielwei0214/bert-base-chinese-finetuned-ner 。
 
 在比赛数据集上微调，选择验证集（从比赛训练集上切分0.15做验证集）上F1最高的模型作为最终模型。模型在验证集上表现如下：
 
 ![image-20240104122557092](./picture/image-20240104122557092.png)
 
-训练好的BERT模型地址：https://huggingface.co/gyr66/bert-base-chinese-finetuned-ner。
+训练好的BERT模型地址：https://huggingface.co/gyr66/bert-base-chinese-finetuned-ner 。
 
 ### RoBERTa
 
@@ -103,7 +103,7 @@ RoBERTa在更大的语料上进行了预训练，使用了更大的批量大小�
 
 ![image-20240104122717770](./picture/image-20240104122717770.png)
 
-训练好的RoBERTa模型地址：https://huggingface.co/gyr66/RoBERTa-ext-large-chinese-finetuned-ner。
+训练好的RoBERTa模型地址：https://huggingface.co/gyr66/RoBERTa-ext-large-chinese-finetuned-ner 。
 
 ### RoBERTa + CRF
 
@@ -113,7 +113,7 @@ RoBERTa在更大的语料上进行了预训练，使用了更大的批量大小�
 
 ![image-20240104123129845](./picture/image-20240104123129845.png)
 
-我使用pytorch-crf库（https://github.com/kmkurn/pytorch-crf），将其与Hugging Face的预训练模型进行整合，方法如下：
+我使用pytorch-crf库（ https://github.com/kmkurn/pytorch-crf ），将其与Hugging Face的预训练模型进行整合，方法如下：
 
 1. 创建模型类**BertCrfForTokenClassification**，继承**BertPreTrainedModel**；
 
@@ -131,7 +131,7 @@ RoBERTa在更大的语料上进行了预训练，使用了更大的批量大小�
 
    ![image-20240104123054282](./picture/image-20240104123054282.png)
 
-模型代码请见：https://github.com/gyr66/privacy_detection/blob/master/model.py。
+模型代码请见：https://github.com/gyr66/privacy_detection/blob/master/model.py 。
 
 在比赛数据集上微调，选择验证集上F1最高的模型作为最终模型。模型在验证集上表现如下：
 
@@ -139,7 +139,7 @@ RoBERTa在更大的语料上进行了预训练，使用了更大的批量大小�
 
 可以看到，相比于不加CRF头，模型F1值还减少了（之前F1值是0.7318）。我推测可能是因为BERT已经学习到了token之间的关联，因此CRF头对模型效果提升不明显。由于引入了新的参数，而训练数据量很少，模型并没有被训练很好，导致F1值减少。
 
-训练好的RoBERTa + CRF模型地址： https://huggingface.co/gyr66/RoBERTa-ext-large-crf-chinese-finetuned-ner。
+训练好的RoBERTa + CRF模型地址： https://huggingface.co/gyr66/RoBERTa-ext-large-crf-chinese-finetuned-ner 。
 
 为了方便使用自定义的模型BertCrfForTokenClassification，将模型注册到AutoModelForTokenClassification，并将模型定义文件上传到Hugging Face仓库中。这样可以直接使用AutoModelForTokenClassification.from_pretrained()方法加载使用训练好的带有CRF头的自定义模型，并且可以和token classification的pipeline无缝集成。
 
@@ -160,7 +160,7 @@ RoBERTa在更大的语料上进行了预训练，使用了更大的批量大小�
 1. 模型太大，可训练的参数太多，很快就把训练集的数据全记住了，丢失了泛化能力；
 2. 训练集数据太少。
 
-训练集数据是比赛方给的，没法进行扩充。因此，解决过拟合的问题，主要策略是缩小模型规模。然而，大型预训练模型比小型模型包含更丰富的知识。为了能够利用大型模型的知识，同时减轻过拟合，我选择采用**LoRA**（Low-Rank Adaptation）（https://arxiv.org/abs/2106.09685），冻结预训练模型的权重，而仅仅训练少部分额外权重，然后将训练的权重合并到预训练模型中。这种方式大幅度降低了可训练参数的数量，从而有望有效减缓过拟合的问题。
+训练集数据是比赛方给的，没法进行扩充。因此，解决过拟合的问题，主要策略是缩小模型规模。然而，大型预训练模型比小型模型包含更丰富的知识。为了能够利用大型模型的知识，同时减轻过拟合，我选择采用**LoRA**（Low-Rank Adaptation）（ https://arxiv.org/abs/2106.09685 ），冻结预训练模型的权重，而仅仅训练少部分额外权重，然后将训练的权重合并到预训练模型中。这种方式大幅度降低了可训练参数的数量，从而有望有效减缓过拟合的问题。
 
 ![image-20240104123747801](./picture/image-20240104123747801.png)
 
@@ -186,11 +186,13 @@ RoBERTa在更大的语料上进行了预训练，使用了更大的批量大小�
 
 ![image-20240104123953035](./picture/image-20240104123953035.png)
 
+训练好的LoRA参数地址： https://huggingface.co/gyr66/RoBERTa-ext-large-lora-chinese-finetuned-ner 。
+
 ### 最终效果
 
-最终，我选择在验证集上F1值最好的模型：https://huggingface.co/gyr66/RoBERTa-ext-large-chinese-finetuned-ner。使用这个模型在比赛方提供的测试集上进行预测。
+最终，我选择在验证集上F1值最好的模型： https://huggingface.co/gyr66/RoBERTa-ext-large-chinese-finetuned-ner 。使用这个模型在比赛方提供的测试集上进行预测。
 
-inference脚本请见：https://github.com/gyr66/privacy_detection/blob/master/inference.ipynb。
+inference脚本请见：https://github.com/gyr66/privacy_detection/blob/master/inference.ipynb 。
 
 提交评测，在测试集上F1值约为0.7。
 
