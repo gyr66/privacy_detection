@@ -92,10 +92,10 @@ if __name__ == "__main__":
     peft_config = LoraConfig(
         task_type=TaskType.TOKEN_CLS,
         inference_mode=False,
-        r=8,
+        r=16,
         lora_alpha=16,
         lora_dropout=0.1,
-        bias="none",
+        bias="all",
     )
 
     model = get_peft_model(model, peft_config)
