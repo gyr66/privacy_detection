@@ -5,6 +5,7 @@ from transformers import (
     DataCollatorForTokenClassification,
     TrainingArguments,
     Trainer,
+    AutoModelForTokenClassification,
 )
 from peft import get_peft_model, LoraConfig, TaskType
 from model import BertCrfForTokenClassification
@@ -83,7 +84,7 @@ if __name__ == "__main__":
     check_point = args.check_point
     tokenizer = AutoTokenizer.from_pretrained(check_point, ignore_mismatched_sizes=True)
 
-    model = BertCrfForTokenClassification.from_pretrained(
+    model = AutoModelForTokenClassification.from_pretrained(
         check_point, num_labels=len(id2label)
     )
     model.config.id2label = id2label
@@ -92,7 +93,7 @@ if __name__ == "__main__":
     peft_config = LoraConfig(
         task_type=TaskType.TOKEN_CLS,
         inference_mode=False,
-        r=16,
+        r=8,
         lora_alpha=16,
         lora_dropout=0.1,
         bias="all",
