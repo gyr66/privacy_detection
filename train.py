@@ -5,6 +5,7 @@ from transformers import (
     DataCollatorForTokenClassification,
     TrainingArguments,
     Trainer,
+    AutoModelForTokenClassification,
 )
 from model import BertCrfForTokenClassification
 import evaluate
@@ -59,6 +60,10 @@ if __name__ == "__main__":
     parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--dry_run", action="store_true")
     parser.add_argument("--push_to_hub", action="store_true")
+    parser.add_argument("--use_crf", action="store_true")
+    parser.add_argument("--freeze_base_model", action="store_true")
+    parser.add_argument("--batch_size", type=int, default=32)
+    parser.add_argument("--lr", type=float, default=2e-5)
 
     args = parser.parse_args()
 
@@ -79,21 +84,28 @@ if __name__ == "__main__":
 
     check_point = args.check_point
     tokenizer = AutoTokenizer.from_pretrained(check_point, ignore_mismatched_sizes=True)
-    # model = AutoModelForTokenClassification.from_pretrained(
-    #     check_point, id2label=id2label, label2id=label2id, ignore_mismatched_sizes=True
-    # )
-    model = BertCrfForTokenClassification.from_pretrained(
-        check_point,
-        num_labels=len(id2label),
-    )
+    if args.use_crf:
+        model = BertCrfForTokenClassification.from_pretrained(
+            check_point,
+            num_labels=len(id2label),
+        )
+    else:
+        model = AutoModelForTokenClassification.from_pretrained(
+            check_point,
+            num_labels=len(id2label),
+            ignore_mismatched_sizes=True,
+        )
     model.config.id2label = id2label
     model.config.label2id = label2id
+
+    if args.freeze_base_model:
+        for param in model.base_model.parameters():
+            param.requires_grad = False
 
     tokenized_dataset = dataset.map(
         tokenize_and_align_labels,
         batched=True,
         remove_columns=dataset["train"].column_names,
-        num_proc=16,
         fn_kwargs={"tokenizer": tokenizer},
     )
 
@@ -103,12 +115,11 @@ if __name__ == "__main__":
         args.repo_name,
         evaluation_strategy="epoch",
         save_strategy="epoch",
-        learning_rate=2e-5,
+        learning_rate=args.lr,
         num_train_epochs=args.epochs,
         weight_decay=0.01,
-        per_device_train_batch_size=4,
+        per_device_train_batch_size=args.batch_size,
         logging_strategy="epoch",
-        dataloader_num_workers=16,
         metric_for_best_model="f1",
         load_best_model_at_end=True,
         save_total_limit=1,
