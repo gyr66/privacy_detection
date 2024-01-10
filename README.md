@@ -139,6 +139,10 @@ RoBERTa在更大的语料上进行了预训练，使用了更大的批量大小�
 
 ![image-20240104123524430](./picture/image-20240104123524430.png)
 
+可以看到采用这样的训练策略后，模型的F1值超过了不加CRF头的RoBERTa。
+
+训练好的模型地址：https://huggingface.co/gyr66/RoBERTa-ext-large-crf-chinese-finetuned-ner-v2 。
+
 可以看到，相比于不加CRF头，模型F1值还减少了（之前F1值是0.7318）。我推测可能是因为BERT已经学习到了token之间的关联，因此CRF头对模型效果提升不明显。由于引入了新的参数，而训练数据量很少，模型并没有被训练很好，导致F1值减少。
 
 训练好的RoBERTa + CRF模型地址： https://huggingface.co/gyr66/RoBERTa-ext-large-crf-chinese-finetuned-ner 。
