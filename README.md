@@ -28,7 +28,9 @@
 
 （标注后的目标文本可以是方便抽取实体的任意格式，比如 *<佘达>[name];<建行>[company];<中弘北京像素>[company];<销售总监>[position];<龙坤>[name]* 。）
 
-**阅读理解**：将实体识别转换为阅读理解任务，将输入文本作为context，对于要识别的不同实体类型可以设置不同的问题，比如：找出出现的人名，找出出现的地名等。
+**阅读理解**：将实体识别转换为阅读理解任务，将输入文本作为context，对于要识别的不同实体类型可以设置不同的问题，比如：找出出现的人名，找出出现的地名等。（https://arxiv.org/abs/1910.11476）
+
+**span枚举**：枚举所有可能的span，span通过分类器，判断span是否是某类实体。（https://aclanthology.org/D18-1309）
 
 我们尝试了 **基于BERT的序列标注方法（NLU）** 和 **基于GPT的序列生成方法（NLG）**，在模型的预测输出之上，我们再利用 **正则表达式（规则方法）** 对手机号、微信号、QQ号进行匹配，提升在这三类实体上的召回率（Recall）。
 
@@ -58,7 +60,7 @@
 
 - **BERT**（ https://arxiv.org/abs/1810.04805 ）
 
-我尝试了BERT、RoBERTa，带CRF头以及不带CRF头。
+我尝试了BERT、RoBERTa、ERNIE-3.0，带CRF头以及不带CRF头。
 
 为了解决过拟合问题，我尝试使用**LoRA**（ https://arxiv.org/abs/2106.09685 ），减少可训练的参数数量。
 
@@ -141,6 +143,10 @@ RoBERTa在更大的语料上进行了预训练，使用了更大的批量大小�
 
 训练好的RoBERTa + CRF模型地址： https://huggingface.co/gyr66/RoBERTa-ext-large-crf-chinese-finetuned-ner 。
 
+根据推测，模型效果不好可能是因为训练数据少导致CRF头参数没有被训练很好。于是我采取了以下策略：**采用分层学习率：CRF头的学习率设置为底座模型学习率的100倍**；在比赛数据集上微调，选择验证集上F1最高的模型作为最终模型。模型在验证集上表现如下：
+
+ ![image-20240110143814590](./picture/image-20240110143814590.png)
+
 为了方便使用自定义的模型BertCrfForTokenClassification，将模型注册到AutoModelForTokenClassification，并将模型定义文件上传到Hugging Face仓库中。这样可以直接使用AutoModelForTokenClassification.from_pretrained()方法加载使用训练好的带有CRF头的自定义模型，并且可以和token classification的pipeline无缝集成。
 
 ![image-20240104123622473](./picture/image-20240104123622473.png)
@@ -188,19 +194,36 @@ RoBERTa在更大的语料上进行了预训练，使用了更大的批量大小�
 
 训练好的LoRA参数地址： https://huggingface.co/gyr66/RoBERTa-ext-large-lora-chinese-finetuned-ner 。
 
+尝试使用LoRA减少训练参数的数量来减轻模型过拟合并没有取得很好的效果。我意识到要想真正用少量训练数据得到效果好的模型，仅仅采用trick是没有用的。解决训练集数据量少问题的关键在于**引入外部知识（先验知识）**。比如模型应该在即使没有训练数据的情况下，也能识别哪些是人名、地名等。通过少量数据，向模型示例要找的实体是哪些（即告诉模型某一类实体的含义是什么，比如position，要找的是一些职位实体，如院长、教授等），这样只要基座模型先验知识足够多，应该能够取得很好的效果！为此我首先尝试了百度的**ERNIE 3.0**（ https://arxiv.org/abs/2107.02137 ）。
+
+![image-20240110144037446](./picture/image-20240110144037446.png)
+
+在比赛数据集上微调，选择验证集上F1最高的模型作为最终模型。模型在验证集上表现如下：
+
+![image-20240110144052708](./picture/image-20240110144052708.png)
+
+训练好的模型地址： https://huggingface.co/gyr66/Ernie-3.0-large-chinese-finetuned-ner 。
+
+可以看到模型的效果还是不能让人满意。但是我认为引入先验知识的思路是对的，只是目前基座模型比较小，无法取得非常好的效果。于是我将目光转向**大语言模型**。大语言模型具有非常丰富的先验知识，而且有很强的泛化能力，做这项任务应该能够取得很好的效果。
+
+**大语言模型的尝试请见下一节！**
+
 ### 最终效果
 
-最终，我选择在验证集上F1值最好的模型： https://huggingface.co/gyr66/RoBERTa-ext-large-chinese-finetuned-ner 。使用这个模型在比赛方提供的测试集上进行预测。
+序列标注方法是解决NER问题的经典方法。我尝试了BERT、RoBERTa、ERNIE-3.0、CRF等模型。所有尝试过的模型都上传到了模型仓库中：https://huggingface.co/gyr66 ，方便后面做模型聚合。
 
-inference脚本请见：https://github.com/gyr66/privacy_detection/blob/master/inference.ipynb 。
+![image-20240110144125805](./picture/image-20240110144125805.png)
 
-提交评测，在测试集上F1值约为0.7。
+最终，经过测试，基于ERNIE-3.0的模型：https://huggingface.co/gyr66/Ernie-3.0-large-chinese-finetuned-ner ，在比赛方的测试集上表现最好。
 
-![image-20240104124019341](./picture/image-20240104124019341.png)
+inference脚本请见：https://github.com/gyr66/privacy_detection/blob/master/inference.ipynb  。
+
+提交评测，在**测试集上F1值约为0.72**。
+
+![image-20240110144747108](./picture/image-20240110144747108.png)
 
 ![image-20240104124025627](./picture/image-20240104124025627.png)
 
 ## 序列生成
 
 ## 规则法+Ensemble
-

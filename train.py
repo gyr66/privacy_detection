@@ -11,6 +11,7 @@ from model import BertCrfForTokenClassification
 import evaluate
 import numpy as np
 import argparse
+from torch.optim import AdamW
 
 
 def align_labels_with_tokens(labels, word_ids):
@@ -61,6 +62,7 @@ if __name__ == "__main__":
     parser.add_argument("--dry_run", action="store_true")
     parser.add_argument("--push_to_hub", action="store_true")
     parser.add_argument("--use_crf", action="store_true")
+    parser.add_argument("--crf_lr", type=float, default=2e-3)
     parser.add_argument("--freeze_base_model", action="store_true")
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--lr", type=float, default=2e-5)
@@ -84,10 +86,21 @@ if __name__ == "__main__":
 
     check_point = args.check_point
     tokenizer = AutoTokenizer.from_pretrained(check_point, ignore_mismatched_sizes=True)
+    optimizer = None
     if args.use_crf:
         model = BertCrfForTokenClassification.from_pretrained(
             check_point,
             num_labels=len(id2label),
+        )
+        crf_parameters = [p for n, p in model.named_parameters() if "crf" in n]
+        remaining_parameters = [
+            p for n, p in model.named_parameters() if "crf" not in n
+        ]
+        optimizer = AdamW(
+            [
+                {"params": remaining_parameters, "lr": args.lr},
+                {"params": crf_parameters, "lr": args.crf_lr},
+            ]
         )
     else:
         model = AutoModelForTokenClassification.from_pretrained(
@@ -134,6 +147,7 @@ if __name__ == "__main__":
         data_collator=data_collator,
         compute_metrics=compute_metrics,
         tokenizer=tokenizer,
+        optimizers=(optimizer, None) if optimizer else None,
     )
 
     if not args.dry_run:
