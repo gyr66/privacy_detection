@@ -1,0 +1,14 @@
+protobuf
+transformers>=4.30.2
+cpm_kernels
+torch>=2.0
+gradio~=3.39
+sentencepiece
+accelerate
+sse-starlette
+streamlit>=1.29.0
+fastapi>=0.104.1
+uvicorn~=0.24.0
+loguru~=0.7.2
+mdtex2html>=1.2.0
+latex2mathml>=3.76.0
