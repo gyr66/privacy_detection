@@ -264,7 +264,7 @@ inference脚本请见：https://github.com/gyr66/privacy_detection/blob/master/i
 
 ​	 由于每各个模型对输入要求不同，将序列输入每个模型前按照其最大长度对文本进行切割：
 
-![ensemble2](ensemble6.png)
+![ensemble2](picture/ensemble6.png)
 
 ​	由于每个模型的输出不同，部分token没有预测值。因此将每个模型的预测结果按输入token的顺序放入一个新的字典列表，如果某个token没有被预测出结果，那么其对应的位置放入一个空字典，以保证投票的对齐
 
