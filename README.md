@@ -139,7 +139,6 @@ RoBERTa在更大的语料上进行了预训练，使用了更大的批量大小�
 
 ![image-20240104123524430](./picture/image-20240104123524430.png)
 
-可以看到采用这样的训练策略后，模型的F1值超过了不加CRF头的RoBERTa。
 
 训练好的模型地址：https://huggingface.co/gyr66/RoBERTa-ext-large-crf-chinese-finetuned-ner-v2 。
 
@@ -150,6 +149,8 @@ RoBERTa在更大的语料上进行了预训练，使用了更大的批量大小�
 根据推测，模型效果不好可能是因为训练数据少导致CRF头参数没有被训练很好。于是我采取了以下策略：**采用分层学习率：CRF头的学习率设置为底座模型学习率的100倍**；在比赛数据集上微调，选择验证集上F1最高的模型作为最终模型。模型在验证集上表现如下：
 
  ![image-20240110143814590](./picture/image-20240110143814590.png)
+
+可以看到采用这样的训练策略后，模型的F1值超过了不加CRF头的RoBERTa。
 
 为了方便使用自定义的模型BertCrfForTokenClassification，将模型注册到AutoModelForTokenClassification，并将模型定义文件上传到Hugging Face仓库中。这样可以直接使用AutoModelForTokenClassification.from_pretrained()方法加载使用训练好的带有CRF头的自定义模型，并且可以和token classification的pipeline无缝集成。
 
