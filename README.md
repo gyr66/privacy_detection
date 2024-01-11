@@ -230,6 +230,53 @@ inference脚本请见：https://github.com/gyr66/privacy_detection/blob/master/i
 
 ## 序列生成
 
+起初，我们考虑到比赛提供的训练集较小，为了在ZERO-SHOT测试中取得更好的表现，我们选择了微调LLM（Large Language Model）的方法。为了平衡参数量和原始性能，我们首先采用了ChatGLM3-6b-base作为训练生成模型。据称，ChatGLM3-6b在10b以下拥有最强性能，比较适合序列生成任务。
+
+### 初始效果
+
+在初始效果上，通过简单测试证明LLM生成分类答案是可行的。随后，我们创建了训练集并使用官方的微调代码进行了1000步的训练。然而，在测试集上的结果表现并不理想，GLM3-6b-base似乎无法完全理解输入文本的含义，经常不按照提示进行输出，生成的答案甚至与输入的大小写不一致。
+
+**不按照格式输出**
+
+<img width="622" alt="image" src="https://github.com/gyr66/privacy_detection/assets/83167730/609929f3-57d4-498c-a716-9ed26592281d">
+
+**生成答案与输入大小写不同**
+
+<img width="201" alt="image" src="https://github.com/gyr66/privacy_detection/assets/83167730/0c323312-cd3f-4872-8a66-f96c4953b6af">
+
+
+
+### LoRA微调
+
+为了解决这个问题，我们认为训练集的训练次数可能不足，因此我们决定增加训练步数到10000步（每100步存储一次LoRA权重）。然而，在加载了10000步的LoRA权重后进行测试，评分下降了2%。我们认为10000步的lora权重使得生成的response过于细致，同时还产生了大量错误答案，准确度降低最终取得更差的结果。
+<img width="241" alt="image" src="https://github.com/gyr66/privacy_detection/assets/83167730/139d4cfe-8a62-4451-863d-9fc65256a8c8">
+
+
+### 最终效果
+
+最终，我们尝试了更改PROMPT、选择合适的LoRA权重，并调整了测试结果生成代码。在评测中，我们获得了0.621的得分，但这仍然远远不及在序列标注的结果。
+
+<img width="572" alt="image" src="https://github.com/gyr66/privacy_detection/assets/83167730/542d7773-5e6d-41c8-894b-d5d28ac8ad80">
+
+
+### 测试集文件生成
+
+在生成predict.csv时，鉴于不同的测试文件可能导致代码中断，我们改变了策略，先生成response文件，然后再读取对应输入文本和回答文本，获得命名实体和种类。通过查找实体在原输入文本中的位置，我们生成了测试集文件。详情见make_predict.py
+
+### ChatGLMm3-6b-chat
+
+我们也测试ChatGLM-6b-chat的模型，以期望chat模型能好的按照输入的Prompt去生成答案。但在增加训练步数之后，base模型可能较好的实现格式化输出，且chat-6b模型加载相同权重表现不如base-6b模型，故没有在PPT中进行chat-6b相关的实验内容。
+
+### 总结
+
+总体而言，使用LLM完成分类任务是可行的。
+
+LLM经过大量文本预训练后具有一定的泛化性，但在具体的分类问题中仍需要经过微调。
+
+在生成文本方面，Decoder存在一些问题，LM更依赖自身的预训练来生成答案，这使得生成的实体和原输入文本大小写不同，同时ChatGLM-6b对繁体字的识别分类能力不足。
+
+LLM的参数量较大，更依赖大量的训练数据，同时其内部性能尚不能有效地引导运用和解释，经过LoRA微调后的性能受到一定限制。这也使得其效果不如RoBERTa等较“小”的模型，。
+
 ## 规则法 + Ensemble
 
 ### 正则表达式
