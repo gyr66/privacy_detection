@@ -266,7 +266,7 @@ inference脚本请见：https://github.com/gyr66/privacy_detection/blob/master/i
 
 ### ChatGLMm3-6b-chat
 
-我们也测试ChatGLM-6b-chat的模型，以期望chat模型能好的按照输入的Prompt去生成答案。但在增加训练步数之后，base模型可能较好的实现格式化输出，且chat-6b模型加载相同权重表现不如base-6b模型，故没有在PPT中进行chat-6b相关的实验内容。
+我们也测试ChatGLM-6b-chat的模型，以期望chat模型能更好的按照输入的Prompt去生成答案。但在增加训练步数之后，base模型已经能较好的实现格式化输出，且chat-6b模型在加载相同权重下表现不如base-6b模型，故没有在PPT中展示chat-6b相关的实验内容。
 
 ### 总结
 
