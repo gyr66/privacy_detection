@@ -238,11 +238,11 @@ inference脚本请见：https://github.com/gyr66/privacy_detection/blob/master/i
 
 **不按照格式输出**
 
-<img width="622" alt="image" src="https://github.com/gyr66/privacy_detection/assets/83167730/609929f3-57d4-498c-a716-9ed26592281d">
+![gw-format_error](./picture/gw-format_error.png)
 
 **生成答案与输入大小写不同**
 
-<img width="201" alt="image" src="https://github.com/gyr66/privacy_detection/assets/83167730/0c323312-cd3f-4872-8a66-f96c4953b6af">
+![gw-capital_error](./picture/gw-capital_error.png)
 
 
 
@@ -250,14 +250,14 @@ inference脚本请见：https://github.com/gyr66/privacy_detection/blob/master/i
 
 为了解决这个问题，我们认为训练集的训练次数可能不足，因此我们决定增加训练步数到10000步（每100步存储一次LoRA权重）。然而，在加载了10000步的LoRA权重后进行测试，评分下降了2%。我们认为10000步的lora权重使得生成的response过于细致，同时还产生了大量错误答案，准确度降低最终取得更差的结果。
 
-<img width="241" alt="image" src="https://github.com/gyr66/privacy_detection/assets/83167730/139d4cfe-8a62-4451-863d-9fc65256a8c8">
+![gw-error](./picture/gw-error.png)
 
 
 ### 最终效果
 
 最终，我们尝试了更改PROMPT、选择合适的LoRA权重，并调整了测试结果生成代码。在评测中，我们获得了0.621的得分，但这仍然远远不及在序列标注的结果。
 
-<img width="572" alt="image" src="https://github.com/gyr66/privacy_detection/assets/83167730/542d7773-5e6d-41c8-894b-d5d28ac8ad80">
+![gw-final_result](./picture/gw-final_result.png)
 
 
 ### 测试集文件生成
